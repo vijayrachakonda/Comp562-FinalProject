@@ -5,10 +5,11 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer, TfidfTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 from sklearn.metrics import accuracy_score
 
-df = pd.read_csv('../Downloads/wine-reviews/winemag-data-130k-v2.csv')
+df = pd.read_csv('./winemag-data-130k-v2.csv')
 
 # Selecting only top ten win varieties to be classified
 top_ten = df['variety'].value_counts()[:10].index.tolist()
@@ -41,11 +42,15 @@ x_train_tfidf = tfidf_transformer.fit_transform(x_train_counts)
 # tfidf_vec_test = tfidf_vec.fit_transform(x_test)
 # print(tfidf_vec_test.shape)
 
-model = MultinomialNB().fit(x_train_tfidf, y_train)
+logistRegr = LogisticRegression()
+model_NB = MultinomialNB().fit(x_train_tfidf, y_train)
+model_LR = logistRegr.fit(x_train_tfidf, y_train)
 
 x_test_counts = count_vect.transform(x_test)
 x_test_tfidf = tfidf_transformer.transform(x_test_counts)
 
-predicted_vareities = model.predict(x_test_tfidf)
+predicted_varieties_NB = model_NB.predict(x_test_tfidf)
+predicted_varieties_LR = model_LR.predict(x_test_tfidf)
 
-print("Accuracy: ", accuracy_score(y_test, predicted_vareities))
+print("Accuracy of Multinomial Naive Bayes: ", accuracy_score(y_test, predicted_varieties_NB))
+print("Accuracy of Logistic Regression: ", accuracy_score(y_test, predicted_varieties_LR))
