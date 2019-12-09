@@ -8,11 +8,15 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
+from nltk.tokenize import RegexpTokenizer
+from nltk.stem.snowball import *
 
 df = pd.read_csv('./winemag-data-130k-v2.csv')
 
 # Selecting only top ten win varieties to be classified
 top_ten = df['variety'].value_counts()[:10].index.tolist()
+top_ten_counts = df['variety'].value_counts()[:10]
 df = df[df['variety'].isin(top_ten)]
 
 # Cleaning up dataframe to only show the relevant columns (i.e. description and variety)
@@ -24,11 +28,20 @@ df_y = df['variety']
 
 
 x_train, x_test, y_train, y_test = train_test_split(df_x, df_y, test_size = 0.2)
-# print(x_train.shape, y_train.shape)
 # print(x_test.shape, y_test.shape)
 
-count_vect = CountVectorizer(stop_words="english")
+stemmer = SnowballStemmer('english')
+tokenizer = RegexpTokenizer(r'[a-zA-Z\']+')
+
+def tokenize(text):
+    return [stemmer.stem(word) for word in tokenizer.tokenize(text.lower())]
+
+punc = ['.', ',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}',"%", "flavor", "wine"]
+stops = text.ENGLISH_STOP_WORDS.union(punc)
+count_vect = CountVectorizer(stop_words=stops, tokenizer=tokenize)
 x_train_counts = count_vect.fit_transform(x_train)
+#count_vect = CountVectorizer(stop_words="english")
+#x_train_counts = count_vect.fit_transform(x_train)
 
 
 # making vector of counts for each word in each row in dataframe
@@ -54,3 +67,5 @@ predicted_varieties_LR = model_LR.predict(x_test_tfidf)
 
 print("Accuracy of Multinomial Naive Bayes: ", accuracy_score(y_test, predicted_varieties_NB))
 print("Accuracy of Logistic Regression: ", accuracy_score(y_test, predicted_varieties_LR))
+print(classification_report(y_test, predicted_varieties_NB))
+print(classification_report(y_test, predicted_varieties_LR))
