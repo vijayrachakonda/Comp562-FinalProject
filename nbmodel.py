@@ -34,18 +34,12 @@ x_train, x_test, y_train, y_test = train_test_split(df_x, df_y, test_size = 0.2)
 stemmer = SnowballStemmer('english')
 tokenizer = RegexpTokenizer(r'[a-zA-Z\']+')
 
-def tokenize(text):
-    return [stemmer.stem(word) for word in tokenizer.tokenize(text.lower())]
+#def tokenize(text):
+    #return [stemmer.stem(word) for word in tokenizer.tokenize(text.lower())]
 
-punc = ['.', ',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}', "%", "flavor", "wine", 'abov', 'afterward', 'alon',
-'alreadi', 'alway', 'ani', 'anoth', 'anyon', 'anyth', 'anywher', 'becam', 'becaus', 'becom', 'befor', 'besid', 'cri', 'describ',
-'dure', 'els', 'elsewher', 'empti', 'everi', 'everyon', 'everyth', 'everywher', 'fifti', 'forti', 'henc', 'hereaft', 'herebi',
-'howev', 'hundr', 'inde', 'mani', 'meanwhil', 'moreov', 'nobodi', 'noon', 'noth', 'nowher', 'onc', 'onli', 'otherwis', 'ourselv',
-'perhap', 'pleas', 'sever', 'sinc', 'sincer', 'sixti', 'someon', 'someth', 'sometim', 'somewher', 'themselv', 'thenc', 'thereaft',
-'therebi', 'therefor', 'togeth', 'twelv', 'twenti', 'veri', 'whatev', 'whenc', 'whenev', 'wherea', 'whereaft', 'wherebi', 'wherev',
-'whi', 'yourselv', 'anywh', 'el', 'elsewh', 'everywh', 'ind', 'otherwi', 'plea', 'somewh']
+punc = ['.', ',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}', "%", "flavor", "wine", ]
 stops = text.ENGLISH_STOP_WORDS.union(punc)
-count_vect = CountVectorizer(stop_words=stops, tokenizer=tokenize)
+count_vect = CountVectorizer(stop_words=stops)
 x_train_counts = count_vect.fit_transform(x_train)
 #count_vect = CountVectorizer(stop_words="english")
 #x_train_counts = count_vect.fit_transform(x_train)
@@ -62,8 +56,8 @@ x_train_tfidf = tfidf_transformer.fit_transform(x_train_counts)
 # tfidf_vec_test = tfidf_vec.fit_transform(x_test)
 # print(tfidf_vec_test.shape)
 
-logistRegr = LogisticRegression()
-model_NB = MultinomialNB().fit(x_train_tfidf, y_train)
+logistRegr = LogisticRegression(penalty='l2')
+model_NB = MultinomialNB(alpha=0.1).fit(x_train_tfidf, y_train)
 model_LR = logistRegr.fit(x_train_tfidf, y_train)
 #clf = LinearDiscriminantAnalysis()
 #dense_x_train = x_train_tfidf.toarray()
@@ -86,5 +80,5 @@ print(classification_report(y_test, predicted_varieties_NB))
 print(classification_report(y_test, predicted_varieties_LR))
 #print('Weighted F1 Score of Multinomial Naive Bayes: ', f1_score(y_test, predicted_varieties_NB, average='weighted'))
 #print('Weighted F1 Score of Logistic Regression: ', f1_score(y_test, predicted_varieties_LR, average='weighted'))
-print('Confusion Matrix of Multinomial Naive Bayes: ', confusion_matrix(y_test, predicted_varieties_NB))
-print('Confusion Matrix of Logistic Regression: ', confusion_matrix(y_test, predicted_varieties_LR))
+print('Confusion Matrix of Multinomial Naive Bayes: \n', confusion_matrix(y_test, predicted_varieties_NB))
+print('\nConfusion Matrix of Logistic Regression: \n', confusion_matrix(y_test, predicted_varieties_LR))
