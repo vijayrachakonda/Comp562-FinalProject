@@ -10,7 +10,7 @@ from sklearn.metrics import accuracy_score
 from nltk.tokenize import RegexpTokenizer
 from nltk.stem.snowball import *
 
-df = pd.read_csv('../Downloads/wine-reviews/winemag-data-130k-v2.csv')
+df = pd.read_csv('/Users/vij/Desktop/Comp562-FinalProject/winemag-data-130k-v2.csv')
 
 # Selecting only top ten win varieties to be classified
 top_ten = df['province'].value_counts()[:10].index.tolist()
