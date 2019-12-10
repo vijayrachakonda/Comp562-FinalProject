@@ -1,3 +1,3 @@
 # Comp562-FinalProject
 
-Our implementation of Multinomial Naive Bayes Classifier to predict wine varieties from wine descriptions
+Our implementation of Multinomial Naive Bayes Classifier and Logistic Regression to predict wine varieties from wine descriptions

@@ -9,10 +9,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
-from nltk.tokenize import RegexpTokenizer
-from nltk.stem.snowball import SnowballStemmer
+from sklearn.metrics import confusion_matrix
 
-df = pd.read_csv('/Users/vij/Desktop/Comp562-FinalProject/winemag-data-130k-v2.csv')
+df = pd.read_csv('winemag-data-130k-v2.csv')
 
 # Selecting only top ten win varieties to be classified
 top_ten = df['variety'].value_counts()[:10].index.tolist()
@@ -26,45 +25,38 @@ df = df.loc[:, cols_to_keep]
 df_x = df['description']
 df_y = df['variety']
 
-
+# Training/Test split
 x_train, x_test, y_train, y_test = train_test_split(df_x, df_y, test_size = 0.2)
 
-# print(x_test.shape, y_test.shape)
-
+# Removing english stop words, flavor and wine, and punctuation
 aux_stops= ['.', ',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}',"%", "flavor", "wine"]
 stops = text.ENGLISH_STOP_WORDS.union(aux_stops)
 count_vect = CountVectorizer(stop_words=stops)
 x_train_counts = count_vect.fit_transform(x_train)
 
-
-#count_vect = CountVectorizer(stop_words="english")
-#x_train_counts = count_vect.fit_transform(x_train)
-
-
-# making vector of counts for each word in each row in dataframe
-# tfidf_vec = TfidfVectorizer(stop_words="english")
-# tfidf_vec_train = tfidf_vec.fit_transform(x_train)
+# Making vector of counts for each word in each row in dataframe for training set
 tfidf_transformer = TfidfTransformer()
 x_train_tfidf = tfidf_transformer.fit_transform(x_train_counts)
-print(x_train_tfidf)
-# print(tfidf_vec_train.shape)
 
-# tfidf_vec = TfidfVectorizer(vocabulary=tfidf_vec.vocabulary_, stop_words="english")
-# tfidf_vec_test = tfidf_vec.fit_transform(x_test)
-# print(tfidf_vec_test.shape)
 
-# logistRegr = LogisticRegression(multi_class="multinomial", solver='newton-cg')
-# model_NB = MultinomialNB().fit(x_train_tfidf, y_train)
-# model_LR = logistRegr.fit(x_train_tfidf, y_train)
+# Making vector of counts for each word in each row in dataframe for test set
+x_test_counts = count_vect.transform(x_test)
+x_test_tfidf = tfidf_transformer.transform(x_test_counts)
 
-# x_test_counts = count_vect.transform(x_test)
-# x_test_tfidf = tfidf_transformer.transform(x_test_counts)
+# Training model
+logistRegr = LogisticRegression(penalty='l2')
+model_NB = MultinomialNB(alpha=0.1).fit(x_train_tfidf, y_train)
+model_LR = logistRegr.fit(x_train_tfidf, y_train)
 
-# predicted_varieties_NB = model_NB.predict(x_test_tfidf)
-# predicted_varieties_LR = model_LR.predict(x_test_tfidf)
+# Testing model on test set
+predicted_varieties_NB = model_NB.predict(x_test_tfidf)
+predicted_varieties_LR = model_LR.predict(x_test_tfidf)
 
-# print("Accuracy of Multinomial Naive Bayes: ", accuracy_score(y_test, predicted_varieties_NB))
-# print("Accuracy of Logistic Regression: ", accuracy_score(y_test, predicted_varieties_LR))
+# Output
+print("Accuracy of Multinomial Naive Bayes: ", accuracy_score(y_test, predicted_varieties_NB))
+print("Accuracy of Logistic Regression: ", accuracy_score(y_test, predicted_varieties_LR))
+print(classification_report(y_test, predicted_varieties_NB))
+print(classification_report(y_test, predicted_varieties_LR))
 
-# print(classification_report(y_test, predicted_varieties_NB))
-# print(classification_report(y_test, predicted_varieties_LR))
+print('Confusion Matrix of Multinomial Naive Bayes: \n', confusion_matrix(y_test, predicted_varieties_NB))
+print('\nConfusion Matrix of Logistic Regression: \n', confusion_matrix(y_test, predicted_varieties_LR))
